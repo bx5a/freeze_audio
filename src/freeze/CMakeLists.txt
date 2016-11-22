@@ -17,7 +17,7 @@ if (${ENABLE_TESTS})
     freeze_test
     ${SRC}/freeze/freeze_test.cc
   )
-  add_dependencies(freeze_test external_gtest)
+  add_dependencies(freeze_test external_gtest external_test_resource)
   target_link_libraries(freeze_test
     gtest
     gtest_main

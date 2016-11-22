@@ -33,6 +33,19 @@ if (${ENABLE_TESTS})
   )
   set(gtest_include_dir ${gtest_install_dir}/include)
   link_directories(${gtest_install_dir}/lib)
+
+  # test resources
+  set(test_resource_dir ${CMAKE_BINARY_DIR}/test-resources)
+  ExternalProject_Add(external_test_resource
+    GIT_REPOSITORY "https://github.com/romi1502/freeze_audio.git"
+    UPDATE_COMMAND ""
+    SOURCE_DIR "${test_resource_dir}"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND cd ${test_resource_dir} && python test_script.py
+    INSTALL_COMMAND ""
+  )
+  # original test file => ${test_resource_dir}/test_sample.wav
+  # processed test file => ${test_resource_dir}/test_sample_processed.wav
 endif()
 
 add_subdirectory(./src)
