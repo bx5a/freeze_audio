@@ -44,8 +44,20 @@ if (${ENABLE_TESTS})
     BUILD_COMMAND cd ${test_resource_dir} && python test_script.py
     INSTALL_COMMAND ""
   )
-  # original test file => ${test_resource_dir}/test_sample.wav
-  # processed test file => ${test_resource_dir}/test_sample_processed.wav
+  set(original_test_file "${test_resource_dir}/test_sample.wav")
+  set(processed_test_file "${test_resource_dir}/test_sample_processed.wav")
+
+  # wave library
+  set(wave_install_dir ${CMAKE_BINARY_DIR}/wave-install)
+  ExternalProject_Add(external_wave
+    GIT_REPOSITORY "https://github.com/audionamix/wave.git"
+    GIT_TAG "v0.4a"
+    UPDATE_COMMAND ""
+    CMAKE_ARGS
+      "-DCMAKE_INSTALL_PREFIX=${wave_install_dir}"
+  )
+  set(wave_include_dir ${wave_install_dir}/include)
+  link_directories(${wave_install_dir}/lib)
 endif()
 
 add_subdirectory(./src)

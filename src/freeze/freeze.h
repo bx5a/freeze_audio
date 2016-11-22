@@ -15,6 +15,7 @@ class Freezer {
 
   void Enable();
   void Disable();
+  bool IsEnabled() const;
 
  private:
   std::mutex mutex_;

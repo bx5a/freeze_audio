@@ -240,13 +240,19 @@ std::vector<float> Freezer::Read(std::error_code& err) {
 }
 
 void Freezer::Enable() {
+  if (!params_->is_on) {
+    params_->just_on = true;
+  }
   params_->is_on = true;
-  params_->just_on = true;
 }
 
 void Freezer::Disable() {
-  params_->is_on = false;
   params_->just_on = false;
+  params_->is_on = false;
+}
+  
+bool Freezer::IsEnabled() const {
+  return params_->is_on;
 }
 
 }  // namespace freeze
