@@ -8,7 +8,8 @@
 #endif  // M_PI
 
 #include <Eigen/Core>
-#include <unsupported/Eigen/FFT>
+//#include <unsupported/Eigen/FFT>
+#include "freeze/fft.h"
 
 namespace freeze {
 
@@ -42,7 +43,8 @@ struct Freezer::Parameters {
   bool is_on;
   bool just_on;
 
-  Eigen::FFT<float> fft;
+  FFT fft;
+  //  Eigen::FFT<float> fft;
 };
 
 Vector MakeHanningWindow(size_t length) {
@@ -122,9 +124,10 @@ void Freezer::Init(size_t channel_number, size_t fft_size, float overlap_rate) {
       Matrix::Zero(channel_number, (fft_size + kMaxBufferLen));
   params_->output_buffer =
       Matrix::Zero(channel_number, (fft_size + kMaxBufferLen));
-  params_->fourier_transform = CplxMatrix::Zero(channel_number, fft_size);
+  params_->fourier_transform =
+      CplxMatrix::Zero(fft_size / 2 + 1, channel_number);
   params_->previous_fourier_transform =
-      CplxMatrix::Zero(channel_number, fft_size);
+      CplxMatrix::Zero(fft_size / 2 + 1, channel_number);
   params_->window = MakeHanningWindow(fft_size);
 
   params_->channel_number = channel_number;
@@ -133,6 +136,7 @@ void Freezer::Init(size_t channel_number, size_t fft_size, float overlap_rate) {
   params_->index_sliding = fft_size - params_->hop_size;
   params_->is_on = false;
   params_->just_on = false;
+  params_->fft.Init(fft_size);
 }
 
 void Freezer::Write(const std::vector<float>& data, std::error_code& err) {
@@ -191,8 +195,12 @@ std::vector<float> Freezer::Read(std::error_code& err) {
       Vector windowed_buffer =
           analyzed_buffer.transpose().array() * params_->window.array();
 
-      auto fourier_at_channel = params_->fourier_transform.row(channel);
-      fourier_at_channel = params_->fft.fwd(windowed_buffer, params_->nfft);
+      //      auto fourier_at_channel = params_->fourier_transform.col(channel);
+      //      fourier_at_channel = params_->fft.fwd(windowed_buffer,
+      //      params_->nfft);
+      auto ptr = params_->fourier_transform.data();
+      auto first_idx = channel * params_->fourier_transform.rows();
+      params_->fft.Forward(windowed_buffer.data(), ptr + first_idx);
     }
 
     // get freeze parameters
@@ -214,8 +222,10 @@ std::vector<float> Freezer::Read(std::error_code& err) {
                                 Exp(j(params_->total_dphi)).array();
 
       for (size_t channel = 0; channel < params_->channel_number; channel++) {
-        Eigen::VectorXcf mod_fft_channel = modified_fft.row(channel);
-        auto inverse_fourier = params_->fft.inv(mod_fft_channel);
+        auto ptr = modified_fft.data();
+        auto first_idx = channel * modified_fft.rows();
+        Vector inverse_fourier(params_->nfft);
+        params_->fft.Inverse(ptr + first_idx, inverse_fourier.data());
 
         // get the right block
         auto output_block = params_->output_buffer.block(
@@ -250,9 +260,7 @@ void Freezer::Disable() {
   params_->just_on = false;
   params_->is_on = false;
 }
-  
-bool Freezer::IsEnabled() const {
-  return params_->is_on;
-}
+
+bool Freezer::IsEnabled() const { return params_->is_on; }
 
 }  // namespace freeze

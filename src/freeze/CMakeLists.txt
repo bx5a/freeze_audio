@@ -1,6 +1,8 @@
 set(sources
   ${SRC}/freeze/freeze.h
   ${SRC}/freeze/freeze.cc
+  ${SRC}/freeze/fft.h
+  ${SRC}/freeze/fft.cc
 )
 
 include_directories(${eigen_src})
@@ -9,13 +11,15 @@ add_library(
   freeze
   ${sources}
 )
-add_dependencies(freeze external_eigen)
-target_include_directories(freeze PRIVATE ${eigen_include_dir})
+add_dependencies(freeze external_eigen external_fftw)
+target_include_directories(freeze PRIVATE ${eigen_include_dir} ${fftw_include_dir})
+target_link_libraries(freeze fftw3f)
 
 if (${ENABLE_TESTS})
   add_executable(
     freeze_test
     ${SRC}/freeze/freeze_test.cc
+    ${SRC}/freeze/fft_test.cc
   )
   add_dependencies(freeze_test
     external_gtest

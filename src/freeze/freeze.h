@@ -1,3 +1,6 @@
+#ifndef FREEZE_FREEZE_FREEZE_H_
+#define FREEZE_FREEZE_FREEZE_H_
+
 #include <mutex>
 #include <system_error>
 #include <vector>
@@ -26,3 +29,5 @@ class Freezer {
 };
 
 }  // namespace freeze
+
+#endif  // FREEZE_FREEZE_FREEZE_H_

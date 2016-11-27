@@ -19,6 +19,20 @@ ExternalProject_Add(external_eigen
 )
 set(eigen_include_dir ${eigen_install_dir}/include/eigen3)
 
+set(fftw_source_dir ${CMAKE_BINARY_DIR}/fftw-source)
+set(fftw_install_dir ${CMAKE_BINARY_DIR}/fftw-install)
+ExternalProject_Add(external_fftw
+  URL "http://www.fftw.org/fftw-3.3.5.tar.gz"
+  URL_MD5 6cc08a3b9c7ee06fdd5b9eb02e06f569
+  SOURCE_DIR ${fftw_source_dir}
+  BINARY_DIR ${fftw_source_dir}
+  INSTALL_DIR ${fftw_install_dir}
+  UPDATE_COMMAND ""
+  CONFIGURE_COMMAND ./configure --prefix=${fftw_install_dir} --enable-static --enable-float
+)
+link_directories(${fftw_install_dir}/lib)
+set(fftw_include_dir ${fftw_install_dir}/include)
+
 # enable testing
 if (${ENABLE_TESTS})
   enable_testing()
