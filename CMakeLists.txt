@@ -19,6 +19,19 @@ ExternalProject_Add(external_eigen
 )
 set(eigen_include_dir ${eigen_install_dir}/include/eigen3)
 
+set(ffmpeg_source_dir ${CMAKE_BINARY_DIR}/ffmpeg-source)
+set(ffmpeg_install_dir ${CMAKE_BINARY_DIR}/ffmpeg-install)
+# ExternalProject_Add(external_ffmpeg
+#   GIT_REPOSITORY "https://github.com/FFmpeg/FFmpeg.git"
+#   GIT_TAG "n3.2"
+#   UPDATE_COMMAND ""
+#   SOURCE_DIR "${ffmpeg_source_dir}"
+#   BINARY_DIR "${ffmpeg_source_dir}"
+#   CONFIGURE_COMMAND ./configure --prefix=${ffmpeg_install_dir} --disable-everything --enable-small --enable-fft
+# )
+set(ffmpeg_include_dir ${ffmpeg_install_dir}/include)
+link_directories(${ffmpeg_install_dir}/lib)
+
 # enable testing
 if (${ENABLE_TESTS})
   enable_testing()

@@ -8,7 +8,7 @@
 #endif  // M_PI
 
 #include <Eigen/Core>
-#include <unsupported/Eigen/FFT>
+#include "freeze/fft.h"
 
 namespace freeze {
 
@@ -42,7 +42,7 @@ struct Freezer::Parameters {
   bool is_on;
   bool just_on;
 
-  Eigen::FFT<float> fft;
+  FFT fft;
 };
 
 Vector MakeHanningWindow(size_t length) {
@@ -133,6 +133,8 @@ void Freezer::Init(size_t channel_number, size_t fft_size, float overlap_rate) {
   params_->index_sliding = fft_size - params_->hop_size;
   params_->is_on = false;
   params_->just_on = false;
+  
+  params_->fft.Init(fft_size);
 }
 
 void Freezer::Write(const std::vector<float>& data, std::error_code& err) {
@@ -192,7 +194,7 @@ std::vector<float> Freezer::Read(std::error_code& err) {
           analyzed_buffer.transpose().array() * params_->window.array();
 
       auto fourier_at_channel = params_->fourier_transform.row(channel);
-      fourier_at_channel = params_->fft.fwd(windowed_buffer, params_->nfft);
+      //fourier_at_channel = params_->fft.Forward(windowed_buffer);
     }
 
     // get freeze parameters
@@ -215,8 +217,11 @@ std::vector<float> Freezer::Read(std::error_code& err) {
 
       for (size_t channel = 0; channel < params_->channel_number; channel++) {
         Eigen::VectorXcf mod_fft_channel = modified_fft.row(channel);
-        auto inverse_fourier = params_->fft.inv(mod_fft_channel);
-
+        
+        
+        Eigen::VectorXf inverse_fourier(mod_fft_channel.rows());
+//        auto inverse_fourier = params_->fft.Inverse(mod_fft_channel);
+        
         // get the right block
         auto output_block = params_->output_buffer.block(
             channel, out_buffer_offset, 1, params_->nfft);
