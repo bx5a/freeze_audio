@@ -47,11 +47,11 @@ struct Freezer::Parameters {
   //  Eigen::FFT<float> fft;
 };
 
-Vector MakeHanningWindow(size_t length) {
+Vector MakeSqrtHanningWindow(size_t length) {
   Vector output = Vector::Zero(length);
   for (size_t index = 0; index < length; index++) {
     output[index] =
-        0.5 - 0.5 * cos(2 * M_PI * (static_cast<float>(index) / length));
+        sqrt(0.5 - 0.5 * cos(2 * M_PI * (static_cast<float>(index) / length)));
   }
   return output;
 }
@@ -128,7 +128,7 @@ void Freezer::Init(size_t channel_number, size_t fft_size, float overlap_rate) {
       CplxMatrix::Zero(fft_size / 2 + 1, channel_number);
   params_->previous_fourier_transform =
       CplxMatrix::Zero(fft_size / 2 + 1, channel_number);
-  params_->window = MakeHanningWindow(fft_size);
+  params_->window = MakeSqrtHanningWindow(fft_size);
 
   params_->channel_number = channel_number;
   params_->nfft = fft_size;
